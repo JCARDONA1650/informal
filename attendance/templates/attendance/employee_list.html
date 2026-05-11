@@ -1,86 +1,256 @@
 {% extends "attendance/base.html" %}
 {% load tz %}
+
 {% block title %}Empleados{% endblock %}
+
 {% block content %}
 {% localtime on %}
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h3 class="text-danger mb-0">Empleados</h3>
-  <a href="{% url 'employee_new' %}" class="btn btn-danger">Nuevo empleado</a>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+  <div>
+    <h3 class="text-danger mb-1">Empleados</h3>
+    <small class="text-secondary">
+      Administración general de personal
+    </small>
+  </div>
+
+  <a href="{% url 'employee_new' %}" class="btn btn-danger">
+    + Nuevo empleado
+  </a>
 </div>
 
-<form method="get" class="row g-2 mb-3">
-  <div class="col-md-4">
-    <label class="form-label fw-bold">Proyecto</label>
-    <select name="project" class="form-select bg-dark text-light border-danger">
-      <option value="">Todos</option>
-      {% for p in projects %}
-        <option value="{{ p.slug }}" {% if q_proj == p.slug %}selected{% endif %}>{{ p.name }}</option>
-      {% endfor %}
-    </select>
+<form method="get" class="card bg-dark border-danger mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Proyecto</label>
+
+        <select name="project"
+                class="form-select bg-dark text-light border-danger">
+          <option value="">Todos</option>
+
+          {% for p in projects %}
+            <option value="{{ p.slug }}"
+              {% if q_proj == p.slug %}selected{% endif %}>
+              {{ p.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Nombre</label>
+
+        <input type="text"
+               name="name"
+               value="{{ q_name }}"
+               maxlength="150"
+               class="form-control bg-dark text-light border-danger"
+               placeholder="Buscar por nombre">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Documento</label>
+
+        <input type="text"
+               name="document"
+               value="{{ q_document }}"
+               maxlength="50"
+               class="form-control bg-dark text-light border-danger"
+               placeholder="Documento / ID">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Estado</label>
+
+        <select name="active"
+                class="form-select bg-dark text-light border-danger">
+          <option value="">Todos</option>
+
+          <option value="1"
+            {% if q_active == "1" %}selected{% endif %}>
+            Activos
+          </option>
+
+          <option value="0"
+            {% if q_active == "0" %}selected{% endif %}>
+            Inactivos
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-3 d-grid">
+        <button class="btn btn-danger">
+          Filtrar
+        </button>
+      </div>
+
+      <div class="col-md-3 d-grid">
+        <a href="{% url 'employee_list' %}"
+           class="btn btn-outline-danger">
+          Limpiar filtros
+        </a>
+      </div>
+
+    </div>
   </div>
-  <div class="col-md-4">
-    <label class="form-label fw-bold">Nombre</label>
-    <input type="text"
-           name="name"
-           value="{{ q_name }}"
-           class="form-control bg-dark text-light border-danger"
-           placeholder="Buscar por nombre">
-  </div>
-  <div class="col-md-2 d-flex align-items-end">
-    <button class="btn btn-danger w-100">Filtrar</button>
-  </div>
-  {% if q_proj or q_name %}
-  <div class="col-md-2 d-flex align-items-end">
-    <a class="btn btn-outline-danger w-100" href="{% url 'employee_list' %}">Limpiar</a>
-  </div>
-  {% endif %}
 </form>
 
-<div class="table-responsive">
-  <table class="table table-dark table-striped align-middle border border-danger">
-    <thead class="table-danger text-dark">
-      <tr>
-        <th>Nombre</th>
-        <th>Proyectos</th>
-        <th>Cargo</th>
-        <th>Tarifa (USD)</th>
-        <th>Activo</th>
-        <th class="text-end"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for e in employees %}
-      <tr>
-        <td>{{ e.full_name }}</td>
-        <td style="max-width: 320px;">
-          {% for pr in e.projects.all %}
-            <span class="badge text-bg-secondary me-1 mb-1">{{ pr.name }}</span>
+<div class="card bg-dark border-danger">
+  <div class="card-body p-0">
+
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle mb-0">
+
+        <thead class="table-danger text-dark">
+          <tr>
+            <th>Documento</th>
+            <th>Nombre</th>
+            <th>Cargo</th>
+            <th>Tarifa</th>
+            <th>Moneda</th>
+            <th>Proyectos</th>
+            <th>Estado</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for e in employees %}
+          <tr>
+
+            <td class="fw-semibold">
+              {{ e.document_id|default:"—" }}
+            </td>
+
+            <td>
+              <div class="fw-bold">
+                {{ e.full_name }}
+              </div>
+            </td>
+
+            <td>
+              {{ e.position|default:"—" }}
+            </td>
+
+            <td>
+              {{ e.hourly_rate|default:"0.00" }}
+            </td>
+
+            <td>
+              <span class="badge bg-secondary">
+                {{ e.currency }}
+              </span>
+            </td>
+
+            <td style="max-width: 320px;">
+
+              {% for pr in e.projects.all %}
+                <span class="badge text-bg-secondary me-1 mb-1">
+                  {{ pr.name }}
+                </span>
+              {% empty %}
+                <span class="text-muted">—</span>
+              {% endfor %}
+
+            </td>
+
+            <td>
+
+              {% if e.active %}
+                <span class="badge bg-success">
+                  Activo
+                </span>
+              {% else %}
+                <span class="badge bg-secondary">
+                  Inactivo
+                </span>
+              {% endif %}
+
+            </td>
+
+            <td class="text-end">
+
+              <a href="{% url 'employee_edit' e.pk %}"
+                 class="btn btn-sm btn-outline-danger">
+                Editar
+              </a>
+
+            </td>
+
+          </tr>
+
           {% empty %}
-            <span class="text-muted">—</span>
+
+          <tr>
+            <td colspan="8" class="text-center text-muted py-4">
+              No hay empleados registrados.
+            </td>
+          </tr>
+
           {% endfor %}
-        </td>
-        <td>{{ e.position|default:"—" }}</td>
-        <td>${{ e.hourly_rate|default:"0.00" }}</td>
-        <td>
-          {% if e.active %}
-            <span class="badge text-bg-success">Sí</span>
-          {% else %}
-            <span class="badge text-bg-secondary">No</span>
-          {% endif %}
-        </td>
-        <td class="text-end">
-          <a class="btn btn-sm btn-outline-danger" href="{% url 'employee_edit' e.pk %}">Editar</a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="6" class="text-center text-muted">Sin empleados</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+        </tbody>
+
+      </table>
+    </div>
+  </div>
 </div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-4">
+  <ul class="pagination justify-content-center">
+
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link bg-dark text-danger border-danger"
+           href="?page={{ page_obj.previous_page_number }}&project={{ q_proj }}&name={{ q_name }}&document={{ q_document }}&active={{ q_active }}">
+          Anterior
+        </a>
+      </li>
+    {% endif %}
+
+    <li class="page-item active">
+      <span class="page-link bg-danger border-danger">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+      </span>
+    </li>
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link bg-dark text-danger border-danger"
+           href="?page={{ page_obj.next_page_number }}&project={{ q_proj }}&name={{ q_name }}&document={{ q_document }}&active={{ q_active }}">
+          Siguiente
+        </a>
+      </li>
+    {% endif %}
+
+  </ul>
+</nav>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const nameInput = document.querySelector("[name='name']");
+  const docInput = document.querySelector("[name='document']");
+
+  if (nameInput) {
+    nameInput.addEventListener("input", function () {
+      this.value = this.value.replace(/[0-9]/g, "");
+    });
+  }
+
+  if (docInput) {
+    docInput.addEventListener("input", function () {
+      this.value = this.value.replace(/[^A-Za-z0-9\-.]/g, "").toUpperCase();
+    });
+  }
+
+});
+</script>
 
 {% endlocaltime %}
 {% endblock %}

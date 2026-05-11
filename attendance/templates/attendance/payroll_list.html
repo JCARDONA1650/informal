@@ -1,67 +1,153 @@
 {% extends "attendance/base.html" %}
 {% load tz %}
+
 {% block title %}Nómina{% endblock %}
 
 {% block content %}
 {% localtime on %}
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h3 class="text-danger mb-0">Nómina quincenal</h3>
-  <a class="btn btn-danger" href="{% url 'payroll_new' %}">Nuevo periodo</a>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+  <div>
+    <h3 class="text-danger mb-1">Nómina</h3>
+    <small class="text-secondary">Periodos creados y estado de cierre.</small>
+  </div>
+
+  <a class="btn btn-danger" href="{% url 'payroll_new' %}">
+    + Nuevo periodo
+  </a>
 </div>
 
-<div class="accordion" id="payrollAccordion">
-  {% for g in groups %}
-    <div class="accordion-item bg-dark border border-danger">
-      <h2 class="accordion-header">
-        <button class="accordion-button collapsed bg-dark text-light"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#group{{ forloop.counter }}"
-                aria-expanded="false"
-                aria-controls="group{{ forloop.counter }}">
-          {{ g.name }}
-          <span class="ms-3 small text-secondary">
-            ({{ g.open_count }} abiertas, {{ g.closed_count }} cerradas)
-          </span>
-        </button>
-      </h2>
+<form method="get" class="card bg-dark border-danger mb-4">
+  <div class="card-body">
+    <div class="row g-3">
 
-      <div id="group{{ forloop.counter }}"
-           class="accordion-collapse collapse"
-           data-bs-parent="#payrollAccordion">
-        <div class="accordion-body p-0">
-          <div class="table-responsive">
-            <table class="table table-dark table-striped border border-danger align-middle mb-0">
-              <thead class="table-danger text-dark">
-                <tr>
-                  <th>Rango</th>
-                  <th>Estado</th>
-                  <th class="text-end"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for p in g.periods %}
-                  <tr>
-                    <td>{{ p.start_date }} &rarr; {{ p.end_date }}</td>
-                    <td>{{ p.get_status_display }}</td>
-                    <td class="text-end">
-                      <a class="btn btn-sm btn-outline-danger" href="{% url 'payroll_detail' p.pk %}">Abrir</a>
-                    </td>
-                  </tr>
-                {% empty %}
-                  <tr><td colspan="3" class="text-center text-muted">Sin periodos</td></tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Proyecto</label>
+        <select name="project" class="form-select bg-dark text-light border-danger">
+          <option value="">Todos</option>
+          {% for p in projects %}
+            <option value="{{ p.slug }}" {% if q_project == p.slug %}selected{% endif %}>
+              {{ p.name }}
+            </option>
+          {% endfor %}
+        </select>
       </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Estado</label>
+        <select name="status" class="form-select bg-dark text-light border-danger">
+          <option value="">Todos</option>
+          <option value="OPEN" {% if q_status == "OPEN" %}selected{% endif %}>Abierta</option>
+          <option value="CLOSED" {% if q_status == "CLOSED" %}selected{% endif %}>Cerrada</option>
+        </select>
+      </div>
+
+      <div class="col-md-2 d-grid">
+        <label class="form-label invisible">Buscar</label>
+        <button class="btn btn-danger">Filtrar</button>
+      </div>
+
+      <div class="col-md-2 d-grid">
+        <label class="form-label invisible">Limpiar</label>
+        <a href="{% url 'payroll_list' %}" class="btn btn-outline-danger">Limpiar</a>
+      </div>
+
     </div>
-  {% empty %}
-    <div class="text-muted">Sin periodos registrados.</div>
-  {% endfor %}
+  </div>
+</form>
+
+<div class="card bg-dark border-danger">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle mb-0">
+        <thead class="table-danger text-dark">
+          <tr>
+            <th>Proyecto</th>
+            <th>Rango</th>
+            <th>Estado</th>
+            <th>Creado</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for p in periods %}
+            <tr>
+              <td>
+                {% if p.project %}
+                  {{ p.project.name }}
+                {% else %}
+                  <span class="text-secondary">Todos los proyectos</span>
+                {% endif %}
+              </td>
+
+              <td class="fw-semibold">
+                {{ p.start_date }} → {{ p.end_date }}
+              </td>
+
+              <td>
+                {% if p.status == "OPEN" %}
+                  <span class="badge bg-success">Abierta</span>
+                {% else %}
+                  <span class="badge bg-danger">Cerrada</span>
+                {% endif %}
+              </td>
+
+              <td>
+                {{ p.created_at|date:"Y-m-d H:i" }}
+              </td>
+
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-danger"
+                   href="{% url 'payroll_detail' p.pk %}">
+                  Abrir
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">
+                No hay periodos registrados.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-4">
+  <ul class="pagination justify-content-center">
+
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link bg-dark text-danger border-danger"
+           href="?page={{ page_obj.previous_page_number }}&project={{ q_project }}&status={{ q_status }}">
+          Anterior
+        </a>
+      </li>
+    {% endif %}
+
+    <li class="page-item active">
+      <span class="page-link bg-danger border-danger">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+      </span>
+    </li>
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link bg-dark text-danger border-danger"
+           href="?page={{ page_obj.next_page_number }}&project={{ q_project }}&status={{ q_status }}">
+          Siguiente
+        </a>
+      </li>
+    {% endif %}
+
+  </ul>
+</nav>
+{% endif %}
 
 {% endlocaltime %}
 {% endblock %}

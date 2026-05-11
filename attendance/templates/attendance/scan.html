@@ -1,137 +1,305 @@
 {% extends "attendance/base.html" %}
 {% load tz %}
+
 {% block title %}Registrar Asistencia{% endblock %}
 
 {% block content %}
 {% localtime on %}
+
 <div class="row justify-content-center">
-  <div class="col-lg-7 col-xl-6">
+  <div class="col-lg-8 col-xl-7">
+
     <div class="card bg-dark text-light border-danger shadow-sm">
+
       <div class="card-header bg-danger text-white">
-        <h5 class="mb-0">Registro de Asistencia • {{ project.name }}</h5>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+          <h5 class="mb-0">
+            Registro de Asistencia • {{ project.name }}
+          </h5>
+
+          <span class="badge bg-dark border border-light">
+            Supervisor
+          </span>
+        </div>
       </div>
+
       <div class="card-body">
 
-        {# Mensajes flash #}
         {% if messages %}
           {% for m in messages %}
-            <div class="alert alert-{{ m.tags }} py-2 px-3 mb-3">{{ m }}</div>
+            <div class="alert alert-{{ m.tags }} py-2 px-3 mb-3">
+              {{ m }}
+            </div>
           {% endfor %}
         {% endif %}
 
-        {# ALERTA DE RED (JS la usa, inicialmente oculta) #}
         <div id="net-alert" class="alert alert-danger py-2 px-3 mb-3 d-none"></div>
 
-        {# Errores no asociados a campos #}
         {% if form.non_field_errors %}
           <div class="alert alert-danger py-2 px-3 mb-3">
-            {{ form.non_field_errors }}
+            {% for error in form.non_field_errors %}
+              <div>{{ error }}</div>
+            {% endfor %}
           </div>
         {% endif %}
 
-        <form method="post" enctype="multipart/form-data" class="row g-3">
+        <form method="post"
+              enctype="multipart/form-data"
+              class="row g-3"
+              id="attendance-form"
+              novalidate>
+
           {% csrf_token %}
 
+          {{ form.client_uuid }}
+          {{ form.device_ts }}
+          {{ form.verification_reference }}
+          {{ form.device_name }}
+
           <div class="col-12">
-            <label class="form-label fw-bold">Empleado</label>
+            <label class="form-label fw-bold">
+              Empleado <span class="text-danger">*</span>
+            </label>
+
             {{ form.employee }}
+
             {% if form.employee.errors %}
-              <div class="text-danger small mt-1">{{ form.employee.errors|striptags }}</div>
+              <div class="text-warning small mt-1">
+                {{ form.employee.errors.0 }}
+              </div>
             {% endif %}
           </div>
 
           <div class="col-md-6">
-            <label class="form-label fw-bold">Acción</label>
+            <label class="form-label fw-bold">
+              Acción <span class="text-danger">*</span>
+            </label>
+
             {{ form.action }}
+
             {% if form.action.errors %}
-              <div class="text-danger small mt-1">{{ form.action.errors|striptags }}</div>
+              <div class="text-warning small mt-1">
+                {{ form.action.errors.0 }}
+              </div>
             {% endif %}
           </div>
 
           <div class="col-md-6">
-            <label class="form-label fw-bold">Tomar foto</label>
+            <label class="form-label fw-bold">
+              Método de registro <span class="text-danger">*</span>
+            </label>
+
+            {{ form.source }}
+
+            {% if form.source.errors %}
+              <div class="text-warning small mt-1">
+                {{ form.source.errors.0 }}
+              </div>
+            {% endif %}
+
+            <div class="form-text text-secondary">
+              QR o biométrico. El sistema no guarda huellas ni rostro.
+            </div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-bold">
+              Foto de constancia <span class="text-danger">*</span>
+            </label>
+
             {{ form.evidence_photo }}
+
             {% if form.evidence_photo.errors %}
-              <div class="text-danger small mt-1">{{ form.evidence_photo.errors|striptags }}</div>
+              <div class="text-warning small mt-1">
+                {{ form.evidence_photo.errors.0 }}
+              </div>
             {% else %}
-              <div class="form-text text-secondary">Es obligatorio subir una foto como constancia.</div>
+              <div class="form-text text-secondary">
+                Obligatoria. Formatos permitidos: JPG, PNG o WEBP. Máximo 6 MB.
+              </div>
             {% endif %}
           </div>
 
-          <div class="col-12 d-grid">
-            <button class="btn btn-danger btn-lg" type="submit" id="submit-btn-main-scan">
-              Guardar
+          <div class="col-12 d-grid mt-2">
+            <button class="btn btn-danger btn-lg"
+                    type="submit"
+                    id="submit-btn-main-scan">
+              Guardar registro
             </button>
           </div>
+
         </form>
 
         <hr class="border-danger opacity-50 mt-4">
 
-        <h6 class="text-danger">Escanea este código QR para abrir este formulario:</h6>
-        <div class="text-center my-3 p-3 bg-white border rounded">
-          <img src="{% url 'qr_scan' project.slug %}" alt="QR {{ project.name }}" class="img-fluid" style="max-width:250px;">
+        <div class="row align-items-center g-3">
+
+          <div class="col-md-7">
+            <h6 class="text-danger mb-2">
+              QR del proyecto
+            </h6>
+
+            <p class="text-secondary small mb-0">
+              El supervisor puede compartir este código para que el empleado registre ingreso o salida desde su celular.
+            </p>
+          </div>
+
+          <div class="col-md-5 text-center">
+            <div class="p-3 bg-white border rounded">
+              <img src="{% url 'qr_scan' project.slug %}"
+                   alt="QR {{ project.name }}"
+                   class="img-fluid"
+                   style="max-width:250px;">
+            </div>
+          </div>
+
         </div>
 
       </div>
     </div>
+
   </div>
 </div>
 
-{# JS: chequeo de red antes de enviar #}
 <script>
-(function() {
-  const form = document.querySelector("form");
+(function () {
+  const form = document.getElementById("attendance-form");
   if (!form) return;
 
   const alertBox = document.getElementById("net-alert");
   const submitBtn = document.getElementById("submit-btn-main-scan");
 
-  function resetButton() {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerText = "Guardar";
+  const clientUuidInput = form.querySelector("[name='client_uuid']");
+  const deviceTsInput = form.querySelector("[name='device_ts']");
+  const deviceNameInput = form.querySelector("[name='device_name']");
+  const verificationInput = form.querySelector("[name='verification_reference']");
+  const sourceInput = form.querySelector("[name='source']");
+  const employeeInput = form.querySelector("[name='employee']");
+  const actionInput = form.querySelector("[name='action']");
+  const photoInput = form.querySelector("[name='evidence_photo']");
+
+  function uuidv4() {
+    if (window.crypto && crypto.randomUUID) {
+      return crypto.randomUUID();
     }
+
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === "x" ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 
-  function showAlert(msg, type = "danger") {
+  function showAlert(message, type = "danger") {
     if (!alertBox) {
-      alert(msg);
+      alert(message);
       return;
     }
-    alertBox.textContent = msg;
+
+    alertBox.textContent = message;
     alertBox.className = "alert alert-" + type + " py-2 px-3 mb-3";
   }
 
-  form.addEventListener("submit", function(e) {
-    e.preventDefault();  // detenemos envío mientras verificamos
+  function hideAlert() {
+    if (!alertBox) return;
+    alertBox.textContent = "";
+    alertBox.className = "alert alert-danger py-2 px-3 mb-3 d-none";
+  }
 
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerText = "Enviando...";
+  function setLoading(isLoading) {
+    if (!submitBtn) return;
+
+    submitBtn.disabled = isLoading;
+    submitBtn.innerText = isLoading ? "Enviando..." : "Guardar registro";
+  }
+
+  function validateForm() {
+    if (!employeeInput || !employeeInput.value) {
+      showAlert("Selecciona el empleado antes de guardar.");
+      return false;
     }
 
-    // 1) ¿Hay conexión a nivel de dispositivo?
-    if (!navigator.onLine) {
-      showAlert("Tu conexión es inestable. No se pudo enviar el registro. Muévete a una zona con mejor señal e inténtalo nuevamente.");
-      resetButton();
+    if (!actionInput || !actionInput.value) {
+      showAlert("Selecciona si es ingreso o salida.");
+      return false;
+    }
+
+    if (!sourceInput || !sourceInput.value) {
+      showAlert("Selecciona el método de registro.");
+      return false;
+    }
+
+    if (!photoInput || !photoInput.files || photoInput.files.length === 0) {
+      showAlert("Debes tomar o adjuntar una foto como constancia.");
+      return false;
+    }
+
+    const file = photoInput.files[0];
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      showAlert("Formato de foto no permitido. Usa JPG, PNG o WEBP.");
+      return false;
+    }
+
+    if (file.size > 6 * 1024 * 1024) {
+      showAlert("La foto no puede superar 6 MB.");
+      return false;
+    }
+
+    return true;
+  }
+
+  function fillHiddenFields() {
+    if (clientUuidInput && !clientUuidInput.value) {
+      clientUuidInput.value = uuidv4();
+    }
+
+    if (deviceTsInput) {
+      deviceTsInput.value = new Date().toISOString();
+    }
+
+    if (deviceNameInput) {
+      deviceNameInput.value = navigator.userAgent.slice(0, 100);
+    }
+
+    if (verificationInput && sourceInput && sourceInput.value === "biometric") {
+      verificationInput.value = "biometric-client-confirmed";
+    }
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    hideAlert();
+
+    if (!validateForm()) {
+      setLoading(false);
       return;
     }
 
-    // 2) Ping rápido al servidor para confirmar que responde
+    setLoading(true);
+    fillHiddenFields();
+
+    if (!navigator.onLine) {
+      showAlert("No hay conexión. El registro no se envió. Busca mejor señal e inténtalo nuevamente.");
+      setLoading(false);
+      return;
+    }
+
     fetch(window.location.href, {
       method: "HEAD",
       cache: "no-store"
     })
-    .then(function(resp) {
-      if (!resp.ok) {
-        throw new Error("Status " + resp.status);
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("Servidor no disponible");
       }
-      // Si todo bien, enviamos el formulario realmente
+
       form.submit();
     })
-    .catch(function() {
-      showAlert("No se pudo contactar al servidor. Verifica tu señal e inténtalo otra vez.");
-      resetButton();
+    .catch(function () {
+      showAlert("No se pudo contactar al servidor. Verifica la señal e inténtalo otra vez.");
+      setLoading(false);
     });
   });
 })();

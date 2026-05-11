@@ -1,43 +1,234 @@
 {% extends "attendance/base.html" %}
 {% load tz %}
-{% block title %}Registrar gasto{% endblock %}
+
+{% block title %}
+Registrar gasto
+{% endblock %}
 
 {% block content %}
 {% localtime on %}
 
-<h3 class="mb-4 text-danger">Registrar gasto del proyecto</h3>
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+  <div>
+
+    <h3 class="text-danger mb-1">
+      Registrar gasto del proyecto
+    </h3>
+
+    <small class="text-secondary">
+      Todo gasto afectará automáticamente los balances y utilidad del proyecto.
+    </small>
+
+  </div>
+
+  <a class="btn btn-outline-danger btn-sm"
+     href="{% url 'dashboard' %}">
+    Volver
+  </a>
+
+</div>
+
+{% if form.non_field_errors %}
+  <div class="alert alert-warning border border-danger">
+    {% for error in form.non_field_errors %}
+      <div>{{ error }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
 
 <div class="card bg-dark text-light border-danger shadow-sm">
+
   <div class="card-body">
-    <form method="post" class="row g-3">
+
+    <form method="post"
+          class="row g-3"
+          novalidate>
+
       {% csrf_token %}
+
       <div class="col-md-3">
-        <label class="form-label fw-bold">Proyecto</label>
+
+        <label class="form-label fw-bold">
+          Proyecto
+          <span class="text-danger">*</span>
+        </label>
+
         {{ form.project }}
+
+        {% if form.project.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.project.errors.0 }}
+          </div>
+        {% endif %}
+
       </div>
-      <div class="col-md-3">
-        <label class="form-label fw-bold">Fecha</label>
+
+      <div class="col-md-2">
+
+        <label class="form-label fw-bold">
+          Fecha
+          <span class="text-danger">*</span>
+        </label>
+
         {{ form.date }}
+
+        {% if form.date.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.date.errors.0 }}
+          </div>
+        {% endif %}
+
       </div>
+
       <div class="col-md-3">
-        <label class="form-label fw-bold">Categoría</label>
+
+        <label class="form-label fw-bold">
+          Categoría
+          <span class="text-danger">*</span>
+        </label>
+
         {{ form.category }}
+
+        {% if form.category.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.category.errors.0 }}
+          </div>
+        {% endif %}
+
       </div>
-      <div class="col-md-3">
-        <label class="form-label fw-bold">Monto (USD)</label>
+
+      <div class="col-md-2">
+
+        <label class="form-label fw-bold">
+          Moneda
+          <span class="text-danger">*</span>
+        </label>
+
+        {{ form.currency }}
+
+        {% if form.currency.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.currency.errors.0 }}
+          </div>
+        {% endif %}
+
+      </div>
+
+      <div class="col-md-2">
+
+        <label class="form-label fw-bold">
+          Monto
+          <span class="text-danger">*</span>
+        </label>
+
         {{ form.amount }}
+
+        <div class="form-text text-secondary">
+          Solo números.
+        </div>
+
+        {% if form.amount.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.amount.errors.0 }}
+          </div>
+        {% endif %}
+
       </div>
+
       <div class="col-12">
-        <label class="form-label fw-bold">Descripción</label>
+
+        <label class="form-label fw-bold">
+          Descripción
+        </label>
+
         {{ form.description }}
+
+        <div class="form-text text-secondary">
+          Ejemplo: materiales, herramientas, transporte, renta, combustible.
+        </div>
+
+        {% if form.description.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.description.errors.0 }}
+          </div>
+        {% endif %}
+
       </div>
-      <div class="col-12 d-grid d-md-flex gap-2">
-        <button class="btn btn-danger">Guardar</button>
-        <a class="btn btn-outline-danger" href="{% url 'dashboard' %}">Cancelar</a>
+
+      <div class="col-12">
+
+        <div class="alert alert-dark border border-danger mb-0 small text-secondary">
+
+          El gasto quedará reflejado en:
+          reportes financieros, utilidad, dashboard y análisis del proyecto.
+
+        </div>
+
       </div>
+
+      <div class="col-12 d-grid d-md-flex gap-2 mt-2">
+
+        <button class="btn btn-danger">
+          Guardar gasto
+        </button>
+
+        <a class="btn btn-outline-danger"
+           href="{% url 'dashboard' %}">
+          Cancelar
+        </a>
+
+      </div>
+
     </form>
+
   </div>
+
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const amountInput =
+    document.querySelector("[name='amount']");
+
+  const descriptionInput =
+    document.querySelector("[name='description']");
+
+  if (amountInput) {
+
+    amountInput.addEventListener("input", function () {
+
+      this.value =
+        this.value.replace(/[^0-9.]/g, "");
+
+      const parts =
+        this.value.split(".");
+
+      if (parts.length > 2) {
+
+        this.value =
+          parts[0] + "." + parts.slice(1).join("");
+
+      }
+
+    });
+
+  }
+
+  if (descriptionInput) {
+
+    descriptionInput.addEventListener("input", function () {
+
+      this.value =
+        this.value.replace(/[<>]/g, "");
+
+    });
+
+  }
+
+});
+</script>
 
 {% endlocaltime %}
 {% endblock %}

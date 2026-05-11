@@ -1,60 +1,362 @@
 <!-- attendance/templates/attendance/dashboard.html -->
 {% extends "attendance/base.html" %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard · Proyectos{% endblock %}
 
 {% block content %}
-<h3 class="mb-4 text-danger">Proyectos</h3>
 
-<div class="row g-4 mb-5">
+{# ── Encabezado sección proyectos ── #}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <span class="section-accent-bar"></span>
+  <h2 class="section-heading mb-0">Proyectos activos</h2>
+</div>
+
+{# ── Grid de proyectos ── #}
+<div class="row g-3 mb-5">
   {% for p in projects %}
-  <div class="col-md-4">
-    <div class="card bg-dark text-light border-danger shadow-sm h-100">
-      <div class="card-header bg-danger text-white">
-        <h5 class="mb-0">{{ p.name }}</h5>
-      </div>
-      <div class="card-body d-flex flex-column">
-        <p class="flex-grow-1">Registrar asistencia y ver QR del proyecto.</p>
-        <div class="d-grid gap-2">
-          <a href="{% url 'scan' p.slug %}" class="btn btn-danger">Abrir registro</a>
-          <a href="{% url 'report' %}?project={{ p.slug }}" class="btn btn-outline-danger">Ver reportes</a>
-          {% if request.user.is_superuser %}
-            <a href="{% url 'project_finance_dashboard' p.slug %}" class="btn btn-outline-danger">Finanzas</a>
-          {% endif %}
+  <div class="col-sm-6 col-lg-4">
+    <div class="proj-card h-100">
+
+      {# Cabecera de la card #}
+      <div class="proj-card-top">
+        <div class="proj-icon">
+          <i class="bi bi-buildings" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="proj-name">{{ p.name }}</div>
+          <div class="proj-sub">Registrar asistencia · QR</div>
         </div>
       </div>
+
+      {# Botones de acción #}
+      <div class="proj-actions">
+        <a href="{% url 'scan' p.slug %}" class="btn-dash btn-dash-red">
+          <i class="bi bi-qr-code-scan"></i> Abrir registro
+        </a>
+        <a href="{% url 'report' %}?project={{ p.slug }}" class="btn-dash btn-dash-outline">
+          <i class="bi bi-bar-chart-line"></i> Ver reportes
+        </a>
+        {% if request.user.is_superuser %}
+          <a href="{% url 'project_finance_dashboard' p.slug %}" class="btn-dash btn-dash-gold">
+            <i class="bi bi-cash-stack"></i> Finanzas
+          </a>
+        {% endif %}
+      </div>
+
     </div>
   </div>
   {% empty %}
-    <p class="text-muted">No tienes proyectos asignados.</p>
+    <div class="col-12">
+      <div class="empty-state">
+        <i class="bi bi-folder2-open empty-icon" aria-hidden="true"></i>
+        <p class="mb-0">No tienes proyectos asignados.</p>
+      </div>
+    </div>
   {% endfor %}
 </div>
 
+{# ── Panel de administración (solo superusuario) ── #}
 {% if request.user.is_superuser %}
-  <hr class="border-danger opacity-50">
 
-  <!-- Sección Empleados (solo admin) -->
-  <h3 class="mb-4 text-danger">Empleados</h3>
-  <div class="card bg-dark text-light border-danger shadow-sm mb-4">
-    <div class="card-body">
-      <p class="mb-3">Gestiona el listado de empleados, sus cargos y tarifas por hora.</p>
-      <div class="d-grid gap-2 d-md-flex">
-        <a href="{% url 'employee_list' %}" class="btn btn-danger">Ver empleados</a>
-        <a href="{% url 'employee_new' %}" class="btn btn-outline-danger">➕ Nuevo empleado</a>
-      </div>
-    </div>
+  <div class="admin-divider my-4"></div>
+
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <span class="section-accent-bar"></span>
+    <h2 class="section-heading mb-0">Administración</h2>
+    <span class="admin-badge">Solo admin</span>
   </div>
 
-  <!-- Sección Nómina (solo admin) -->
-  <h3 class="mb-4 text-danger">Nómina</h3>
-  <div class="card bg-dark text-light border-danger shadow-sm">
-    <div class="card-body">
-      <p class="mb-3">Calcula y ajusta pagos quincenales por empleado. Puedes filtrar por proyecto o incluir todos.</p>
-      <div class="d-grid gap-2 d-md-flex">
-        <a href="{% url 'payroll_list' %}" class="btn btn-danger">Ver periodos</a>
-        <a href="{% url 'payroll_new' %}" class="btn btn-outline-danger">➕ Nuevo periodo</a>
-        <a href="{% url 'payroll_export_xlsx' %}" class="btn btn-outline-danger">⬇️ Exportar nómina</a>
+  <div class="row g-3">
+
+    {# Card Empleados #}
+    <div class="col-sm-6">
+      <div class="admin-card h-100">
+        <div class="admin-card-header">
+          <div class="admin-icon">
+            <i class="bi bi-people" aria-hidden="true"></i>
+          </div>
+          <div class="admin-title">Empleados</div>
+        </div>
+        <p class="admin-desc">Gestiona el listado de empleados, sus cargos y tarifas por hora.</p>
+        <div class="admin-btn-row">
+          <a href="{% url 'employee_list' %}" class="btn-dash btn-dash-red">
+            <i class="bi bi-list-ul"></i> Ver empleados
+          </a>
+          <a href="{% url 'employee_new' %}" class="btn-dash btn-dash-outline">
+            <i class="bi bi-plus-lg"></i> Nuevo
+          </a>
+        </div>
       </div>
     </div>
+
+    {# Card Nómina #}
+    <div class="col-sm-6">
+      <div class="admin-card h-100">
+        <div class="admin-card-header">
+          <div class="admin-icon">
+            <i class="bi bi-receipt" aria-hidden="true"></i>
+          </div>
+          <div class="admin-title">Nómina</div>
+        </div>
+        <p class="admin-desc">Calcula y ajusta pagos quincenales por empleado. Filtra por proyecto o incluye todos.</p>
+        <div class="admin-btn-row">
+          <a href="{% url 'payroll_list' %}" class="btn-dash btn-dash-red">
+            <i class="bi bi-calendar3"></i> Periodos
+          </a>
+          <a href="{% url 'payroll_new' %}" class="btn-dash btn-dash-outline">
+            <i class="bi bi-plus-lg"></i> Nuevo
+          </a>
+          <a href="{% url 'payroll_export_xlsx' %}" class="btn-dash btn-dash-gold">
+            <i class="bi bi-download"></i> XLSX
+          </a>
+        </div>
+      </div>
+    </div>
+
   </div>
 {% endif %}
+
+{# ── Estilos específicos del dashboard ── #}
+<style>
+  /* ── Encabezados de sección ── */
+  .section-accent-bar {
+    display: inline-block;
+    width: 3px;
+    height: 18px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #c0392b, #c9a84c);
+    flex-shrink: 0;
+  }
+
+  .section-heading {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    color: #5a6678 !important;
+  }
+
+  /* ── Card de proyecto ── */
+  .proj-card {
+    background: linear-gradient(160deg, #151c26, #1a2230);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform .18s ease, border-color .18s ease;
+  }
+
+  .proj-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(201,168,76,.25);
+  }
+
+  .proj-card-top {
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .proj-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #1a1200;
+    border: 1px solid rgba(201,168,76,.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #c9a84c;
+    flex-shrink: 0;
+  }
+
+  .proj-name {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: #fff;
+    line-height: 1.25;
+    margin-bottom: 3px;
+  }
+
+  .proj-sub {
+    font-size: 11px;
+    color: #5a6678;
+    font-weight: 500;
+  }
+
+  .proj-actions {
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  /* ── Botones del dashboard ── */
+  .btn-dash {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .15s ease;
+    width: 100%;
+    border: none;
+  }
+
+  .btn-dash-red {
+    background: #c0392b;
+    color: #fff;
+    border: 1px solid #e04535;
+  }
+  .btn-dash-red:hover {
+    background: #e04535;
+    color: #fff;
+  }
+
+  .btn-dash-outline {
+    background: transparent;
+    color: #b8c6d6;
+    border: 1px solid rgba(255,255,255,.12);
+  }
+  .btn-dash-outline:hover {
+    background: rgba(255,255,255,.05);
+    border-color: rgba(255,255,255,.22);
+    color: #fff;
+  }
+
+  .btn-dash-gold {
+    background: transparent;
+    color: #c9a84c;
+    border: 1px solid rgba(201,168,76,.28);
+  }
+  .btn-dash-gold:hover {
+    background: rgba(201,168,76,.10);
+    border-color: #c9a84c;
+    color: #e8c46a;
+  }
+
+  /* ── Estado vacío ── */
+  .empty-state {
+    background: linear-gradient(160deg, #151c26, #1a2230);
+    border: 1px dashed rgba(255,255,255,.10);
+    border-radius: 16px;
+    padding: 40px 24px;
+    text-align: center;
+    color: #5a6678;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .empty-icon {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 10px;
+    color: #2c3844;
+  }
+
+  /* ── Divisor admin ── */
+  .admin-divider {
+    height: 1px;
+    background: linear-gradient(90deg, #c0392b22, #c9a84c33, transparent);
+  }
+
+  /* ── Badge admin ── */
+  .admin-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    background: rgba(201,168,76,.10);
+    color: #c9a84c;
+    border: 1px solid rgba(201,168,76,.22);
+  }
+
+  /* ── Card de admin ── */
+  .admin-card {
+    background: linear-gradient(160deg, #151c26, #1a2230);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color .18s ease;
+  }
+
+  .admin-card:hover {
+    border-color: rgba(201,168,76,.22);
+  }
+
+  .admin-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .admin-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    background: #16120a;
+    border: 1px solid rgba(201,168,76,.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #c9a84c;
+    flex-shrink: 0;
+  }
+
+  .admin-title {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: #fff;
+  }
+
+  .admin-desc {
+    font-size: 12px;
+    color: #5a6678;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .admin-btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: auto;
+    padding-top: 4px;
+  }
+
+  .admin-btn-row .btn-dash {
+    width: auto;
+    flex: 1;
+    min-width: 80px;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 576px) {
+    .proj-actions { flex-direction: column; }
+    .admin-btn-row { flex-direction: column; }
+    .admin-btn-row .btn-dash { width: 100%; }
+  }
+</style>
+
 {% endblock %}

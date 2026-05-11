@@ -3,198 +3,404 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Iniciar sesión • UNAD PROYECTOS</title>
+  <title>Iniciar sesión · NexoLaboral</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- Bootstrap (grid/reset únicamente) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <!-- Fuente Inter (profesional, legible) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --ambu-red:#dc3545;
-      --ambu-red-dark:#c02e3c;
-      --ambu-bg:#121417;
-      --ambu-card:#1b1f24;
-      --ambu-text:#e9ecef;
-    }
-    html,body{height:100%}
-    body{
-      background: radial-gradient(1200px 800px at 20% -10%, #1a1f26 0%, #121417 55%, #0f1216 100%);
-      color:var(--ambu-text);
-      display:flex; align-items:center; justify-content:center;
-      padding:24px;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    /* ── Variables ── */
+    :root {
+      --red:       #c0392b;
+      --red-hover: #e04535;
+      --gold:      #c9a84c;
+      --gold-lt:   #e8c46a;
+      --bg:        #0b0f14;
+      --bg-card:   #13181f;
+      --bg-hdr:    #0f131a;
+      --bg-input:  #0c1017;
+      --text:      #e8edf4;
+      --muted:     #5a6678;
+      --border:    rgba(255,255,255,.08);
+      --border-gold: rgba(201,168,76,.28);
     }
 
-    /* Card */
-    .login-card{
-      background:linear-gradient(180deg, #1c2127 0%, #181c21 100%);
-      border:1px solid rgba(255,255,255,.06);
+    /* ── Reset / Base ── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      background:
+        radial-gradient(ellipse 900px 600px at 15% -10%, rgba(192,57,43,.07), transparent),
+        radial-gradient(ellipse 700px 500px at 85% 110%, rgba(201,168,76,.05), transparent),
+        var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Card ── */
+    .login-card {
+      width: 100%;
+      max-width: 430px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: 20px;
+      overflow: hidden;
       box-shadow:
-        0 30px 60px rgba(0,0,0,.45),
-        inset 0 1px 0 rgba(255,255,255,.03);
-      border-radius:16px;
-      overflow:hidden;
-      max-width: 440px;
-      width:100%;
+        0 30px 70px rgba(0,0,0,.55),
+        0 0 0 1px rgba(201,168,76,.06);
     }
 
-    .login-header{
-      background:linear-gradient(135deg, var(--ambu-red) 0%, var(--ambu-red-dark) 100%);
-      color:#fff;
-      padding:18px 22px;
-      display:flex; align-items:center; justify-content:center; gap:10px;
-    }
-    .brand-title{
-      font-weight:800;
-      letter-spacing:.4px;
-      margin:0;
+    /* Línea rojo→dorado arriba */
+    .login-card::before {
+      content: '';
+      display: block;
+      height: 2px;
+      background: linear-gradient(90deg, var(--red) 0%, var(--gold) 55%, transparent 100%);
     }
 
-    .logo-spin{
-      width:32px; height:32px; border-radius:50%; background:#fff;
-      display:inline-flex; align-items:center; justify-content:center;
-      animation:spin 5s linear infinite;
-      box-shadow:0 0 0 2px rgba(255,255,255,.25) inset;
-      overflow:hidden;
-    }
-    .logo-spin img{width:28px;height:28px;object-fit:contain}
-    @keyframes spin { from{transform:rotateY(0)} to{transform:rotateY(360deg)} }
-
-    .login-body{ padding:22px; }
-
-    /* Inputs */
-    .form-control, .form-select{
-      background:#0f1419; border:1px solid rgba(255,255,255,.1); color:var(--ambu-text);
-      padding:12px 44px 12px 44px; border-radius:10px;
-    }
-    .form-control:focus, .form-select:focus{
-      border-color:var(--ambu-red); box-shadow:0 0 0 .25rem rgba(220,53,69,.15); background:#0e1217; color:#fff;
-    }
-    .input-icon{
-      position:relative;
-    }
-    .input-icon > .bi{
-      position:absolute; left:12px; top:65%; transform:translateY(-50%); opacity:.7; color:#c9d1d9;
-      pointer-events:none; font-size:18px;
-    }
-    .input-icon .toggle-pass{
-      position:absolute; right:10px; top:65%; transform:translateY(-50%);
-      background:transparent; border:0; color:#c9d1d9; opacity:.8;
-    }
-    .input-icon .toggle-pass:hover{opacity:1}
-
-    .btn-ambu{
-      background:var(--ambu-red); border-color:var(--ambu-red);
-      padding:.8rem 1rem; font-weight:700; letter-spacing:.2px; border-radius:10px;
-    }
-    .btn-ambu:hover{ background:var(--ambu-red-dark); border-color:var(--ambu-red-dark) }
-    .btn-ambu:active{ transform:translateY(1px) }
-
-    .muted-link{ color:#f1aeb5; text-decoration:none }
-    .muted-link:hover{ color:#fff; text-decoration:underline }
-
-    .alert-compact{
-      padding:.65rem .85rem; border-radius:10px; border:1px solid rgba(255,255,255,.08);
-      background:#2a0f14; color:#ffd6db;
+    /* ── Header ── */
+    .login-header {
+      background: var(--bg-hdr);
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      padding: 28px 28px 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
     }
 
-    @media (max-width: 420px){
-      .login-body{ padding:18px }
-      .brand-title{ font-size:1.05rem }
+    /* Logo — cuadrado redondeado, sin fondo blanco */
+    .logo-box {
+      width: 76px;
+      height: 76px;
+      border-radius: 18px;
+      background: #16120a;
+      border: 1px solid rgba(201,168,76,.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spin-y 6s linear infinite;
+      overflow: hidden;
+      flex-shrink: 0;
     }
-    .grupo-creditos{
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  background: rgba(27,31,36,.92);
-  border: 1px solid rgba(255,255,255,.10);
-  color: #ffffff;
-  padding: 12px 16px;
-  border-radius: 14px;
-  font-size: 13px;
-  line-height: 1.5;
-  text-align: left;
-  box-shadow: 0 10px 30px rgba(0,0,0,.45);
-  backdrop-filter: blur(6px);
-  z-index: 9999;
-  min-width: 220px;
-}
 
-.grupo-title{
-  font-size: 15px;
-  font-weight: 800;
-  margin-bottom: 2px;
-  color: #ffffff;
-}
+    /* La imagen del logo se muestra directamente sin círculo blanco */
+    .logo-box img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      display: block;
+    }
 
-.grupo-subtitle{
-  color: #f1aeb5;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
+    @keyframes spin-y {
+      from { transform: rotateY(0deg); }
+      to   { transform: rotateY(360deg); }
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      color: #fff;
+      margin: 0;
+      line-height: 1.1;
+      text-align: center;
+    }
+
+    .brand-name span { color: var(--gold); }
+
+    .brand-sub {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2px;
+      text-align: center;
+    }
+
+    /* ── Body ── */
+    .login-body { padding: 26px 28px 30px; }
+
+    /* Alert de error */
+    .alert-login {
+      background: rgba(192,57,43,.13);
+      border: none;
+      border-left: 3px solid var(--red);
+      border-radius: 10px;
+      color: #fca5a5;
+      font-size: 13px;
+      font-weight: 600;
+      padding: .65rem .9rem;
+      margin-bottom: 18px;
+    }
+
+    /* ── Labels ── */
+    .form-label {
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      letter-spacing: .10em !important;
+      text-transform: uppercase !important;
+      color: var(--muted) !important;
+      margin-bottom: 7px !important;
+    }
+
+    /* ── Inputs ── */
+    .input-wrap { position: relative; }
+
+    .input-wrap .inp-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #3d4f62;
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    .form-control {
+      background: var(--bg-input) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 11px !important;
+      color: var(--text) !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      height: 48px !important;
+      padding: 0 46px !important;
+      transition: border-color .18s, box-shadow .18s !important;
+    }
+
+    .form-control:focus {
+      border-color: var(--gold) !important;
+      box-shadow: 0 0 0 3px rgba(201,168,76,.12) !important;
+      background: #0a0e14 !important;
+      color: #fff !important;
+    }
+
+    .form-control::placeholder { color: #2c3844 !important; }
+
+    /* Toggle contraseña */
+    .toggle-pass {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #3d4f62;
+      font-size: 16px;
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      transition: color .15s;
+    }
+
+    .toggle-pass:hover { color: #8a96a4; }
+
+    /* ── Botón principal ── */
+    .btn-login {
+      width: 100%;
+      height: 50px;
+      background: var(--red);
+      border: none;
+      border-radius: 11px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .16s, transform .12s;
+      margin-top: 4px;
+    }
+
+    .btn-login:hover  { background: var(--red-hover); }
+    .btn-login:active { transform: scale(.985); }
+
+    /* ── Divisor ── */
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .login-divider::before,
+    .login-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,.06);
+    }
+
+    .login-divider span {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: #2c3844;
+    }
+
+    /* ── Link ── */
+    .link-forgot {
+      display: block;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold);
+      text-decoration: none;
+      transition: color .15s;
+    }
+
+    .link-forgot:hover { color: var(--gold-lt); }
+
+    /* ── Badge empresa ── */
+    .corp-badge {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: rgba(19,24,31,.95);
+      border: 1px solid rgba(201,168,76,.20);
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 12px;
+      line-height: 1.5;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.40);
+      z-index: 9999;
+    }
+
+    .corp-badge .corp-name {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: -.01em;
+      color: #fff;
+    }
+
+    .corp-badge .corp-tag {
+      font-weight: 700;
+      color: var(--gold);
+      font-size: 11px;
+      letter-spacing: .04em;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 420px) {
+      .login-body    { padding: 20px 20px 24px; }
+      .login-header  { padding: 22px 20px 18px; }
+      .brand-name    { font-size: 19px; }
+    }
   </style>
 </head>
 <body>
-  <main class="login-card">
+
+  <main class="login-card" role="main">
+
     <header class="login-header">
-      <span class="logo-spin">
-        <img src="{% static 'img/LOGO_PERFIL_AMBU_GROUP.png' %}" alt="AmbuGroup">
-      </span>
-      <h2 class="brand-title">Gestor Negocios Informales</h2>
+      <!-- Logo sin borde blanco, cuadrado dorado oscuro -->
+      <div class="logo-box">
+        <img src="{% static 'img/NexoLaboral.png' %}" alt="NexoLaboral logo">
+      </div>
+      <div>
+        <h1 class="brand-name">Nexo<span>Laboral</span></h1>
+        <p class="brand-sub">Sistema de gestión laboral</p>
+      </div>
     </header>
 
     <section class="login-body">
+
       {% if form.errors %}
-        <div class="alert alert-compact mb-3" role="alert">
-          Usuario o contraseña inválidos.
+        <div class="alert-login" role="alert">
+          <i class="bi bi-exclamation-circle me-2"></i>Usuario o contraseña inválidos.
         </div>
       {% endif %}
 
       <form method="post" novalidate>
         {% csrf_token %}
 
-        <div class="mb-3 input-icon">
-          <i class="bi bi-person"></i>
-          <label class="form-label fw-semibold">Usuario</label>
-          <input type="text" name="username" class="form-control" required autofocus>
+        <!-- Usuario -->
+        <div class="mb-3">
+          <label class="form-label" for="id_username">Usuario</label>
+          <div class="input-wrap">
+            <i class="bi bi-person inp-icon" aria-hidden="true"></i>
+            <input
+              id="id_username"
+              type="text"
+              name="username"
+              class="form-control"
+              placeholder="Ingresa tu usuario"
+              required
+              autofocus
+              autocomplete="username">
+          </div>
         </div>
 
-        <div class="mb-3 input-icon">
-          <i class="bi bi-lock"></i>
-          <label class="form-label fw-semibold">Contraseña</label>
-          <input id="pass" type="password" name="password" class="form-control" required>
-          <button type="button" class="toggle-pass" aria-label="Mostrar contraseña" onclick="togglePass()">
-            <i class="bi bi-eye"></i>
-          </button>
+        <!-- Contraseña -->
+        <div class="mb-4">
+          <label class="form-label" for="id_password">Contraseña</label>
+          <div class="input-wrap">
+            <i class="bi bi-lock inp-icon" aria-hidden="true"></i>
+            <input
+              id="id_password"
+              type="password"
+              name="password"
+              class="form-control"
+              placeholder="••••••••"
+              required
+              autocomplete="current-password">
+            <button type="button" class="toggle-pass" id="toggleBtn" aria-label="Mostrar contraseña">
+              <i class="bi bi-eye" id="eyeIcon" aria-hidden="true"></i>
+            </button>
+          </div>
         </div>
 
-        <button class="btn btn-ambu w-100 mb-2" type="submit">Ingresar</button>
+        <button type="submit" class="btn-login">Ingresar</button>
 
-        <p class="text-center mb-0">
-          <a class="muted-link" href="#">¿Olvidaste tu contraseña?</a>
-        </p>
+        <div class="login-divider"><span>acceso</span></div>
+
+        <a href="#" class="link-forgot">¿Olvidaste tu contraseña?</a>
       </form>
+
     </section>
   </main>
 
-  <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <!-- Badge empresa (opcional, quitar si no se necesita) -->
+  <div class="corp-badge" aria-hidden="true">
+    <div class="corp-name">AmbuGroup</div>
+    <div class="corp-tag">COLOMBIA · USA</div>
+    <div style="color:#3d4f62;font-size:11px;margin-top:2px">Pintura · Construcción · Informales</div>
+  </div>
+
   <script>
-    function togglePass(){
-      const input = document.getElementById('pass');
-      const btn   = event.currentTarget;
-      const isText = input.type === 'text';
-      input.type = isText ? 'password' : 'text';
-      btn.innerHTML = isText ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
-      btn.setAttribute('aria-label', isText ? 'Mostrar contraseña' : 'Ocultar contraseña');
-    }
+    document.getElementById('toggleBtn').addEventListener('click', function () {
+      const inp  = document.getElementById('id_password');
+      const ico  = document.getElementById('eyeIcon');
+      const show = inp.type === 'password';
+      inp.type           = show ? 'text' : 'password';
+      ico.className      = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+      this.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    });
   </script>
-  <div class="grupo-creditos">
-  <div class="grupo-title">Grupo 88</div>
-  <div class="grupo-subtitle">Estudiantes</div>
-  <div>Jorge Cardona</div>
-  <div>Gregory</div>
-  <div>Juan Manuel Gutierrez</div>
-  <div>Walther Alejandro Ferrucho</div>
-</div>
+
 </body>
 </html>

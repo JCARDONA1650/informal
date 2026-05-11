@@ -1,35 +1,135 @@
 {% extends "attendance/base.html" %}
 {% load tz %}
-{% block title %}{{ emp|default:'Nuevo' }} Empleado{% endblock %}
+
+{% block title %}
+  {% if emp %}Editar empleado{% else %}Nuevo empleado{% endif %}
+{% endblock %}
+
 {% block content %}
 {% localtime on %}
 
-<h3 class="mb-4 text-danger">{{ emp|default:'Nuevo' }} Empleado</h3>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="text-danger mb-0">
+    {% if emp %}Editar empleado{% else %}Nuevo empleado{% endif %}
+  </h3>
 
-<form method="post" class="row g-3">
-  {% csrf_token %}
-  <div class="col-md-6">
-    <label class="form-label fw-bold">Nombre completo</label>
-    {{ form.full_name }}
+  <a href="{% url 'employee_list' %}" class="btn btn-outline-danger btn-sm">
+    Volver
+  </a>
+</div>
+
+{% if form.non_field_errors %}
+  <div class="alert alert-warning border border-danger">
+    {% for error in form.non_field_errors %}
+      <div>{{ error }}</div>
+    {% endfor %}
   </div>
+{% endif %}
+
+<form method="post" class="row g-3" novalidate>
+  {% csrf_token %}
+
+  <div class="col-md-4">
+    <label class="form-label fw-bold">Documento / ID</label>
+    {{ form.document_id }}
+    <div class="form-text text-secondary">
+      Opcional. Letras, números, guiones o puntos.
+    </div>
+    {% if form.document_id.errors %}
+      <div class="text-warning small mt-1">{{ form.document_id.errors.0 }}</div>
+    {% endif %}
+  </div>
+
+  <div class="col-md-8">
+    <label class="form-label fw-bold">Nombre completo <span class="text-danger">*</span></label>
+    {{ form.full_name }}
+    <div class="form-text text-secondary">
+      Solo letras y espacios. No números.
+    </div>
+    {% if form.full_name.errors %}
+      <div class="text-warning small mt-1">{{ form.full_name.errors.0 }}</div>
+    {% endif %}
+  </div>
+
   <div class="col-md-6">
     <label class="form-label fw-bold">Cargo</label>
     {{ form.position }}
-  </div>
-  <div class="col-md-4">
-    <label class="form-label fw-bold">Tarifa por hora (USD)</label>
-    {{ form.hourly_rate }}
-  </div>
-  <div class="col-md-2 d-flex align-items-center">
-    <div class="form-check mt-3">
-      {{ form.active }}
-      <label class="form-check-label">Activo</label>
+    <div class="form-text text-secondary">
+      Ejemplo: Painter, Drywall installer, Supervisor.
     </div>
+    {% if form.position.errors %}
+      <div class="text-warning small mt-1">{{ form.position.errors.0 }}</div>
+    {% endif %}
   </div>
-  <div class="col-12 d-grid">
-    <button class="btn btn-danger">Guardar</button>
+
+  <div class="col-md-3">
+    <label class="form-label fw-bold">Tarifa por hora <span class="text-danger">*</span></label>
+    {{ form.hourly_rate }}
+    <div class="form-text text-secondary">
+      Solo números. Ejemplo: 18.50
+    </div>
+    {% if form.hourly_rate.errors %}
+      <div class="text-warning small mt-1">{{ form.hourly_rate.errors.0 }}</div>
+    {% endif %}
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label fw-bold">Moneda <span class="text-danger">*</span></label>
+    {{ form.currency }}
+    {% if form.currency.errors %}
+      <div class="text-warning small mt-1">{{ form.currency.errors.0 }}</div>
+    {% endif %}
+  </div>
+
+  <div class="col-md-12">
+    <div class="form-check mt-2">
+      {{ form.active }}
+      <label class="form-check-label fw-bold">
+        Empleado activo
+      </label>
+    </div>
+    {% if form.active.errors %}
+      <div class="text-warning small mt-1">{{ form.active.errors.0 }}</div>
+    {% endif %}
+  </div>
+
+  <div class="col-12 d-grid mt-3">
+    <button type="submit" class="btn btn-danger">
+      Guardar empleado
+    </button>
   </div>
 </form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const fullName = document.querySelector("[name='full_name']");
+  const documentId = document.querySelector("[name='document_id']");
+  const hourlyRate = document.querySelector("[name='hourly_rate']");
+
+  if (fullName) {
+    fullName.addEventListener("input", function () {
+      this.value = this.value.replace(/[0-9]/g, "");
+    });
+  }
+
+  if (documentId) {
+    documentId.addEventListener("input", function () {
+      this.value = this.value.replace(/[^A-Za-z0-9\-.]/g, "").toUpperCase();
+    });
+  }
+
+  if (hourlyRate) {
+    hourlyRate.addEventListener("input", function () {
+      this.value = this.value.replace(/[^0-9.]/g, "");
+
+      const parts = this.value.split(".");
+      if (parts.length > 2) {
+        this.value = parts[0] + "." + parts.slice(1).join("");
+      }
+    });
+  }
+});
+</script>
 
 {% endlocaltime %}
 {% endblock %}

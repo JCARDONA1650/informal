@@ -1,0 +1,91 @@
+{% extends "attendance/base.html" %}
+
+{% block title %}Usuarios{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="text-danger mb-1">Usuarios</h3>
+    <small class="text-secondary">Admins y supervisores del sistema.</small>
+  </div>
+
+  <a href="{% url 'bo_user_create' %}" class="btn btn-danger">
+    + Nuevo usuario
+  </a>
+</div>
+
+<form method="get" class="card bg-dark border-danger mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-5">
+        <label class="form-label fw-bold">Buscar</label>
+        <input type="text"
+               name="q"
+               value="{{ q }}"
+               class="form-control bg-dark text-light border-danger"
+               placeholder="Usuario, nombre o email">
+      </div>
+
+      <div class="col-md-2 d-grid">
+        <label class="form-label invisible">Buscar</label>
+        <button class="btn btn-danger">Buscar</button>
+      </div>
+
+      <div class="col-md-2 d-grid">
+        <label class="form-label invisible">Limpiar</label>
+        <a href="{% url 'bo_user_list' %}" class="btn btn-outline-danger">Limpiar</a>
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="card bg-dark border-danger">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle mb-0">
+        <thead class="table-danger text-dark">
+          <tr>
+            <th>Usuario</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Activo</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td class="fw-bold">{{ u.username }}</td>
+            <td>{{ u.first_name }} {{ u.last_name }}</td>
+            <td>{{ u.email|default:"—" }}</td>
+            <td>
+              {% if u.is_superuser %}
+                <span class="badge bg-danger">Admin</span>
+              {% else %}
+                <span class="badge bg-secondary">Supervisor</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if u.is_active %}
+                <span class="badge bg-success">Activo</span>
+              {% else %}
+                <span class="badge bg-secondary">Inactivo</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">
+              No hay usuarios registrados.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

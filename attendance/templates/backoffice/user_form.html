@@ -1,0 +1,93 @@
+{% extends "attendance/base.html" %}
+
+{% block title %}Nuevo Usuario{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="text-danger mb-1">Nuevo usuario</h3>
+    <small class="text-secondary">
+      Crea admins o supervisores sin entrar al panel admin de Django.
+    </small>
+  </div>
+
+  <a href="{% url 'bo_user_list' %}" class="btn btn-outline-danger btn-sm">
+    Volver
+  </a>
+</div>
+
+{% if form.non_field_errors %}
+  <div class="alert alert-warning border border-danger">
+    {% for error in form.non_field_errors %}
+      <div>{{ error }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card bg-dark text-light border-danger">
+  <div class="card-body">
+
+    <form method="post" class="row g-3" novalidate>
+      {% csrf_token %}
+
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Usuario</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+          <div class="text-warning small mt-1">{{ form.username.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Nombre</label>
+        {{ form.first_name }}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Apellido</label>
+        {{ form.last_name }}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Email</label>
+        {{ form.email }}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Rol</label>
+        {{ form.role }}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Contraseña</label>
+        {{ form.password1 }}
+        {% if form.password1.errors %}
+          <div class="text-warning small mt-1">{{ form.password1.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Confirmar contraseña</label>
+        {{ form.password2 }}
+        {% if form.password2.errors %}
+          <div class="text-warning small mt-1">{{ form.password2.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-12">
+        <div class="alert alert-dark border border-danger small text-secondary mb-0">
+          Admin puede gestionar todo. Supervisor solo debe ver proyectos asignados y registrar asistencia.
+        </div>
+      </div>
+
+      <div class="col-12 d-grid d-md-flex gap-2">
+        <button class="btn btn-danger">Crear usuario</button>
+        <a href="{% url 'bo_user_list' %}" class="btn btn-outline-danger">Cancelar</a>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

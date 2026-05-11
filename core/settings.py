@@ -26,33 +26,27 @@ DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
 
 
 ALLOWED_HOSTS = [
-    "ambugroupllc.work",
-    "www.ambugroupllc.work",
     "localhost",
     "127.0.0.1"
 ]
 
-# Detrás de Cloudflare (HTTPS)
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Cookies seguras (sirviendo por HTTPS a través de Cloudflare)
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_SAMESITE = "Lax"
 
 # Redirección a HTTPS
 SECURE_SSL_REDIRECT = False
 
 # HSTS (siempre HTTPS)
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+#SECURE_HSTS_SECONDS = 31536000
+#SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+#SECURE_HSTS_PRELOAD = True
 
 # Orígenes de confianza para CSRF
 CSRF_TRUSTED_ORIGINS = [
-    "https://ambugroupllc.work",
-    "https://www.ambugroupllc.work",
+    "http://localhost:9000",
 ]
 
 # ───────────────── Apps ─────────────────
@@ -105,12 +99,8 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Base de datos (desde .env)
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("PGNAME", "ambu_app_db"),
-        "USER": os.getenv("PGUSER", "postgres"),
-        "PASSWORD": os.getenv("PGPASSWORD", "jorge2026."),
-        "HOST": os.getenv("PGHOST", "host.docker.internal"),
-        "PORT": os.getenv("PGPORT", "5432"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 

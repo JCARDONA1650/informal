@@ -1,69 +1,314 @@
 {% extends "attendance/base.html" %}
+
 {% block title %}Panel Admin{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 class="mb-0">Panel Administrativo</h2>
+
+{# ── Encabezado ── #}
+<div class="bo-page-header mb-4">
+  <div class="bo-eyebrow">
+    <span class="accent-bar"></span>
+    Panel administrativo
+  </div>
+  <h2 class="bo-title">Backoffice</h2>
+  <p class="bo-sub">
+    Gestión central del sistema: proyectos, empleados, asistencia, nómina, finanzas y reglas de almuerzo.
+  </p>
 </div>
 
-<div class="row g-3">
-  <div class="col-md-4">
-    <div class="card bg-dark border-danger text-light">
-      <div class="card-body">
-        <h5>Proyectos</h5>
-        <p class="display-6">{{ projects_count }}</p>
-        <a href="{% url 'bo_project_list' %}" class="btn btn-danger">Gestionar</a>
+{# ── Grid de métricas ── #}
+<div class="bo-grid">
+
+  {# Proyectos #}
+  <div class="bo-card accent-red">
+    <div class="bo-card-top">
+      <div>
+        <div class="bo-label">Proyectos</div>
+        <div class="bo-value">{{ projects_count }}</div>
+      </div>
+      <div class="bo-icon red">
+        <i class="bi bi-buildings" aria-hidden="true"></i>
       </div>
     </div>
+    <a href="{% url 'bo_project_list' %}" class="bo-btn bo-btn-primary">
+      <i class="bi bi-arrow-right-circle"></i> Gestionar
+    </a>
   </div>
 
-  <div class="col-md-4">
-    <div class="card bg-dark border-danger text-light">
-      <div class="card-body">
-        <h5>Empleados</h5>
-        <p class="display-6">{{ employees_count }}</p>
-        <a href="{% url 'bo_employee_list' %}" class="btn btn-danger">Gestionar</a>
+  {# Empleados #}
+  <div class="bo-card">
+    <div class="bo-card-top">
+      <div>
+        <div class="bo-label">Empleados</div>
+        <div class="bo-value">{{ employees_count }}</div>
+      </div>
+      <div class="bo-icon blue">
+        <i class="bi bi-people" aria-hidden="true"></i>
       </div>
     </div>
+    <a href="{% url 'bo_employee_list' %}" class="bo-btn">
+      <i class="bi bi-arrow-right-circle"></i> Gestionar
+    </a>
   </div>
 
-  <div class="col-md-4">
-    <div class="card bg-dark border-danger text-light">
-      <div class="card-body">
-        <h5>Asistencias</h5>
-        <p class="display-6">{{ attendance_count }}</p>
-        <a href="{% url 'bo_attendance_list' %}" class="btn btn-danger">Gestionar</a>
+  {# Asistencias #}
+  <div class="bo-card">
+    <div class="bo-card-top">
+      <div>
+        <div class="bo-label">Asistencias</div>
+        <div class="bo-value">{{ attendance_count }}</div>
+      </div>
+      <div class="bo-icon green">
+        <i class="bi bi-calendar-check" aria-hidden="true"></i>
       </div>
     </div>
+    <a href="{% url 'bo_attendance_list' %}" class="bo-btn">
+      <i class="bi bi-arrow-right-circle"></i> Gestionar
+    </a>
   </div>
 
-  <div class="col-md-4">
-    <div class="card bg-dark border-danger text-light">
-      <div class="card-body">
-        <h5>Nómina</h5>
-        <p class="display-6">{{ payroll_count }}</p>
-        <a href="{% url 'bo_payroll_list' %}" class="btn btn-danger">Gestionar</a>
+  {# Nómina #}
+  <div class="bo-card accent-gold">
+    <div class="bo-card-top">
+      <div>
+        <div class="bo-label">Nómina</div>
+        <div class="bo-value">{{ payroll_count }}</div>
+      </div>
+      <div class="bo-icon gold">
+        <i class="bi bi-receipt" aria-hidden="true"></i>
       </div>
     </div>
+    <a href="{% url 'bo_payroll_list' %}" class="bo-btn">
+      <i class="bi bi-arrow-right-circle"></i> Gestionar
+    </a>
   </div>
 
-  <div class="col-md-4">
-    <div class="card bg-dark border-danger text-light">
-      <div class="card-body">
-        <h5>Ingresos</h5>
-        <p class="display-6">{{ income_count }}</p>
-        <a href="{% url 'bo_income_list' %}" class="btn btn-danger">Gestionar</a>
+  {# Ingresos #}
+  <div class="bo-card accent-gold">
+    <div class="bo-card-top">
+      <div>
+        <div class="bo-label">Ingresos</div>
+        <div class="bo-value">{{ income_count }}</div>
+      </div>
+      <div class="bo-icon gold">
+        <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
       </div>
     </div>
+    <a href="{% url 'bo_income_list' %}" class="bo-btn">
+      <i class="bi bi-arrow-right-circle"></i> Gestionar
+    </a>
   </div>
 
-  <div class="col-md-4">
-    <div class="card bg-dark border-danger text-light">
-      <div class="card-body">
-        <h5>Gastos</h5>
-        <p class="display-6">{{ expense_count }}</p>
-        <a href="{% url 'bo_expense_list' %}" class="btn btn-danger">Gestionar</a>
+  {# Gastos #}
+  <div class="bo-card accent-red">
+    <div class="bo-card-top">
+      <div>
+        <div class="bo-label">Gastos</div>
+        <div class="bo-value">{{ expense_count }}</div>
+      </div>
+      <div class="bo-icon red">
+        <i class="bi bi-graph-down-arrow" aria-hidden="true"></i>
       </div>
     </div>
+    <a href="{% url 'bo_expense_list' %}" class="bo-btn bo-btn-primary">
+      <i class="bi bi-arrow-right-circle"></i> Gestionar
+    </a>
   </div>
+
+  {# Horario Almuerzo #}
+  <div class="bo-card">
+    <div class="bo-card-top">
+      <div>
+        <div class="bo-label">Almuerzo</div>
+        <div class="bo-value">{{ lunch_rules_count|default:"0" }}</div>
+      </div>
+      <div class="bo-icon purple">
+        <i class="bi bi-clock-history" aria-hidden="true"></i>
+      </div>
+    </div>
+    <a href="{% url 'bo_lunch_rule_list' %}" class="bo-btn">
+      <i class="bi bi-gear"></i> Configurar
+    </a>
+  </div>
+
+  {# Usuarios #}
+  <div class="bo-card">
+    <div class="bo-card-top">
+      <div>
+        <div class="bo-label">Usuarios</div>
+        <div class="bo-value">
+          <i class="bi bi-person-lock" style="font-size:1.6rem;color:#94a3b8" aria-hidden="true"></i>
+        </div>
+      </div>
+      <div class="bo-icon slate">
+        <i class="bi bi-shield-lock" aria-hidden="true"></i>
+      </div>
+    </div>
+    <a href="{% url 'bo_user_list' %}" class="bo-btn">
+      <i class="bi bi-arrow-right-circle"></i> Gestionar
+    </a>
+  </div>
+
 </div>
+
+<style>
+  /* ── Encabezado ── */
+  .bo-page-header { max-width: 600px; }
+
+  .bo-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #5a6678;
+    margin-bottom: 8px;
+  }
+
+  .accent-bar {
+    display: inline-block;
+    width: 3px;
+    height: 14px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #c0392b, #c9a84c);
+    flex-shrink: 0;
+  }
+
+  .bo-title {
+    font-size: 24px !important;
+    font-weight: 900 !important;
+    letter-spacing: -.03em;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .bo-sub {
+    font-size: 12px;
+    color: #5a6678;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ── Grid ── */
+  .bo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  /* ── Card métrica ── */
+  .bo-card {
+    background: linear-gradient(160deg, #151c26, #1a2230);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: transform .18s ease, border-color .18s ease;
+  }
+
+  .bo-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,.14);
+  }
+
+  /* Acento lateral */
+  .bo-card.accent-gold { border-left: 3px solid #c9a84c; }
+  .bo-card.accent-red  { border-left: 3px solid #c0392b; }
+
+  /* ── Top: número + icono ── */
+  .bo-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .bo-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    color: #5a6678;
+    margin-bottom: 6px;
+  }
+
+  .bo-value {
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: -.05em;
+    color: #fff;
+    line-height: 1;
+  }
+
+  /* ── Iconos de color ── */
+  .bo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .bo-icon.gold   { background: #1a1200; border: 1px solid rgba(201,168,76,.28); color: #c9a84c; }
+  .bo-icon.red    { background: #1a0808; border: 1px solid rgba(192,57,43,.28);  color: #e04535; }
+  .bo-icon.blue   { background: #0a1220; border: 1px solid rgba(59,130,246,.22); color: #60a5fa; }
+  .bo-icon.green  { background: #0a1a0e; border: 1px solid rgba(34,197,94,.22);  color: #4ade80; }
+  .bo-icon.purple { background: #120a1a; border: 1px solid rgba(139,92,246,.22); color: #a78bfa; }
+  .bo-icon.slate  { background: #111820; border: 1px solid rgba(148,163,184,.18);color: #94a3b8; }
+
+  /* ── Botones ── */
+  .bo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-decoration: none;
+    transition: all .15s ease;
+    background: transparent;
+    color: #b8c6d6;
+    border: 1px solid rgba(255,255,255,.10);
+    width: 100%;
+    text-align: center;
+  }
+
+  .bo-btn:hover {
+    background: rgba(255,255,255,.05);
+    border-color: rgba(255,255,255,.20);
+    color: #fff;
+  }
+
+  .bo-btn.bo-btn-primary {
+    background: #c0392b;
+    border-color: #e04535;
+    color: #fff;
+  }
+
+  .bo-btn.bo-btn-primary:hover {
+    background: #e04535;
+    color: #fff;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 576px) {
+    .bo-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .bo-value { font-size: 26px; }
+  }
+</style>
+
 {% endblock %}

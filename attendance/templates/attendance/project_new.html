@@ -1,34 +1,221 @@
 {% extends "attendance/base.html" %}
-{% block title %}Nuevo Proyecto{% endblock %}
+
+{% block title %}
+Nuevo Proyecto
+{% endblock %}
 
 {% block content %}
-<h3 class="mb-4 text-danger">Crear proyecto</h3>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+  <div>
+    <h3 class="text-danger mb-1">
+      Crear proyecto
+    </h3>
+
+    <small class="text-secondary">
+      Configuración inicial financiera y operativa del proyecto.
+    </small>
+  </div>
+
+  <a class="btn btn-outline-danger btn-sm"
+     href="{% url 'dashboard' %}">
+    Volver
+  </a>
+
+</div>
+
+{% if form.non_field_errors %}
+  <div class="alert alert-warning border border-danger">
+    {% for error in form.non_field_errors %}
+      <div>{{ error }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
 
 <div class="card bg-dark text-light border-danger shadow-sm">
+
   <div class="card-body">
-    <form method="post" class="row g-3">
+
+    <form method="post"
+          class="row g-3"
+          novalidate>
+
       {% csrf_token %}
+
       <div class="col-md-6">
-        <label class="form-label fw-bold">Nombre</label>
+
+        <label class="form-label fw-bold">
+          Nombre del proyecto
+          <span class="text-danger">*</span>
+        </label>
+
         {{ form.name }}
+
+        <div class="form-text text-secondary">
+          Solo letras, números y espacios.
+        </div>
+
+        {% if form.name.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.name.errors.0 }}
+          </div>
+        {% endif %}
+
       </div>
-      <div class="col-md-6">
-        <label class="form-label fw-bold">Valor del contrato (USD)</label>
+
+      <div class="col-md-3">
+
+        <label class="form-label fw-bold">
+          Valor del contrato
+          <span class="text-danger">*</span>
+        </label>
+
         {{ form.contract_value }}
+
+        <div class="form-text text-secondary">
+          Solo números.
+        </div>
+
+        {% if form.contract_value.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.contract_value.errors.0 }}
+          </div>
+        {% endif %}
+
       </div>
+
+      <div class="col-md-3">
+
+        <label class="form-label fw-bold">
+          Moneda
+          <span class="text-danger">*</span>
+        </label>
+
+        {{ form.currency }}
+
+        {% if form.currency.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.currency.errors.0 }}
+          </div>
+        {% endif %}
+
+      </div>
+
       <div class="col-md-6">
-        <label class="form-label fw-bold">Supervisores</label>
+
+        <label class="form-label fw-bold">
+          Supervisores
+        </label>
+
         {{ form.supervisors }}
+
+        <div class="form-text text-secondary">
+          Puedes seleccionar varios supervisores.
+        </div>
+
+        {% if form.supervisors.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.supervisors.errors.0 }}
+          </div>
+        {% endif %}
+
       </div>
+
       <div class="col-md-6">
-        <label class="form-label fw-bold">Empleados</label>
+
+        <label class="form-label fw-bold">
+          Empleados
+        </label>
+
         {{ form.employees }}
+
+        <div class="form-text text-secondary">
+          Asigna el personal inicial del proyecto.
+        </div>
+
+        {% if form.employees.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.employees.errors.0 }}
+          </div>
+        {% endif %}
+
       </div>
-      <div class="col-12 d-grid d-md-flex gap-2">
-        <button class="btn btn-danger">Guardar</button>
-        <a class="btn btn-outline-danger" href="{% url 'dashboard' %}">Cancelar</a>
+
+      <div class="col-12">
+
+        <div class="alert alert-dark border border-danger mb-0 small text-secondary">
+
+          El proyecto quedará conectado automáticamente con:
+          asistencia, nómina, QR, biometría, reportes y finanzas.
+
+        </div>
+
       </div>
+
+      <div class="col-12 d-grid d-md-flex gap-2 mt-2">
+
+        <button class="btn btn-danger">
+          Guardar proyecto
+        </button>
+
+        <a class="btn btn-outline-danger"
+           href="{% url 'dashboard' %}">
+
+          Cancelar
+
+        </a>
+
+      </div>
+
     </form>
+
   </div>
+
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const nameInput =
+    document.querySelector("[name='name']");
+
+  const contractInput =
+    document.querySelector("[name='contract_value']");
+
+  if (nameInput) {
+
+    nameInput.addEventListener("input", function () {
+
+      this.value =
+        this.value.replace(/[^A-Za-z0-9ÁÉÍÓÚáéíóúÑñ()\\-.,\\s]/g, "");
+
+    });
+
+  }
+
+  if (contractInput) {
+
+    contractInput.addEventListener("input", function () {
+
+      this.value =
+        this.value.replace(/[^0-9.]/g, "");
+
+      const parts =
+        this.value.split(".");
+
+      if (parts.length > 2) {
+
+        this.value =
+          parts[0] + "." + parts.slice(1).join("");
+
+      }
+
+    });
+
+  }
+
+});
+</script>
+
 {% endblock %}

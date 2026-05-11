@@ -1,23 +1,124 @@
 {% extends "attendance/base.html" %}
 {% load tz %}
+
 {% block title %}Nueva nómina{% endblock %}
+
 {% block content %}
 {% localtime on %}
-<h3 class="text-danger mb-3">Nuevo periodo de nómina</h3>
-<form method="post" class="row g-3">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="text-danger mb-1">Nuevo periodo de nómina</h3>
+    <small class="text-secondary">
+      Crea el rango que luego calculará horas, tarifa y total a pagar.
+    </small>
+  </div>
+
+  <a href="{% url 'payroll_list' %}" class="btn btn-outline-danger btn-sm">
+    Volver
+  </a>
+</div>
+
+{% if form.non_field_errors %}
+  <div class="alert alert-warning border border-danger">
+    {% for error in form.non_field_errors %}
+      <div>{{ error }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<form method="post" class="card bg-dark border-danger" novalidate>
   {% csrf_token %}
-  <div class="col-md-3">
-    <label class="form-label fw-bold">Inicio</label>{{ form.start_date }}
-  </div>
-  <div class="col-md-3">
-    <label class="form-label fw-bold">Fin</label>{{ form.end_date }}
-  </div>
-  <div class="col-md-4">
-    <label class="form-label fw-bold">Proyecto (opcional)</label>{{ form.project }}
-  </div>
-  <div class="col-12 d-grid">
-    <button class="btn btn-danger">Crear</button>
+
+  <div class="card-body">
+    <div class="row g-3">
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">
+          Inicio <span class="text-danger">*</span>
+        </label>
+
+        {{ form.start_date }}
+
+        {% if form.start_date.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.start_date.errors.0 }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">
+          Fin <span class="text-danger">*</span>
+        </label>
+
+        {{ form.end_date }}
+
+        {% if form.end_date.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.end_date.errors.0 }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-bold">
+          Proyecto
+        </label>
+
+        {{ form.project }}
+
+        <div class="form-text text-secondary">
+          Déjalo vacío para calcular todos los proyectos.
+        </div>
+
+        {% if form.project.errors %}
+          <div class="text-warning small mt-1">
+            {{ form.project.errors.0 }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-12">
+        <div class="alert alert-dark border border-danger mb-0 small text-secondary">
+          Al crear el periodo, el sistema irá a recalcular la nómina con los registros de asistencia existentes.
+        </div>
+      </div>
+
+      <div class="col-12 d-grid mt-2">
+        <button class="btn btn-danger">
+          Crear periodo
+        </button>
+      </div>
+
+    </div>
   </div>
 </form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const startInput = document.querySelector("[name='start_date']");
+  const endInput = document.querySelector("[name='end_date']");
+
+  function validateDates() {
+    if (!startInput || !endInput) return;
+
+    if (startInput.value && endInput.value && endInput.value < startInput.value) {
+      endInput.setCustomValidity("La fecha final no puede ser menor que la fecha inicial.");
+    } else {
+      endInput.setCustomValidity("");
+    }
+  }
+
+  if (startInput) {
+    startInput.addEventListener("change", validateDates);
+  }
+
+  if (endInput) {
+    endInput.addEventListener("change", validateDates);
+  }
+});
+</script>
+
 {% endlocaltime %}
 {% endblock %}

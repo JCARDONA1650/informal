@@ -5,235 +5,571 @@
 
 {% block content %}
 {% localtime on %}
-<h3 class="mb-4 text-danger">Reporte Mensual</h3>
 
-<form class="row g-2 mb-4" method="get">
-  <div class="col-md-3">
-    <label class="form-label fw-bold">Mes (YYYY-MM)</label>
-    <input type="month" class="form-control bg-dark text-light border-danger" name="month" value="{{ month }}">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+  <div>
+    <h3 class="text-danger mb-1">Reporte de Asistencia</h3>
+    <small class="text-secondary">
+      Control mensual de ingresos, salidas y nómina.
+    </small>
   </div>
-  <div class="col-md-3">
-    <label class="form-label fw-bold">Proyecto</label>
-    <select name="project" class="form-select bg-dark text-light border-danger">
-      <option value="">Todos</option>
-      {% for p in projects %}
-        <option value="{{ p.slug }}" {% if q_proj == p.slug %}selected{% endif %}>{{ p.name }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="col-md-3">
-    <label class="form-label fw-bold">Nombre</label>
-    <input type="text" class="form-control bg-dark text-light border-danger" name="name" value="{{ q_name }}">
-  </div>
-  <div class="col-md-2 d-flex align-items-end">
-    <button class="btn btn-danger w-100">Filtrar</button>
-  </div>
-</form>
-
-<div class="table-responsive">
-  <table class="table table-dark table-striped align-middle border border-danger">
-    <thead class="table-danger text-dark">
-      <tr>
-        <th>Proyecto</th>
-        <th>Fecha</th>
-        <th>Empleado</th>
-        <th>Ingreso</th>
-        <th>Salida</th>
-        <th>Trabajado (neto)</th>
-        <th>Almuerzo</th>
-        <th>Foto</th>
-        {% if request.user.is_superuser %}
-          <th>Tarifa (USD)</th>
-          <th>Total (USD)</th>
-        {% endif %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in rows %}
-      <tr>
-        <td>{{ r.project.name }}</td>
-        <td>{{ r.date|date:"Y-m-d" }}</td>
-        <td>{{ r.employee.full_name }}</td>
-        <td>{% if r.check_in %}{{ r.check_in|date:"Y-m-d H:i" }}{% else %}—{% endif %}</td>
-        <td>{% if r.check_out %}{{ r.check_out|date:"Y-m-d H:i" }}{% else %}—{% endif %}</td>
-        <td>
-          {% if r.worked_hhmm_net %}
-            <strong class="text-danger">{{ r.worked_hhmm_net }}</strong>
-          {% else %}
-            <strong class="text-danger">{{ r.worked_hhmm }}</strong>
-          {% endif %}
-
-          {# Indicadores de ajuste manual #}
-          {% if r.manual_minutes %}
-            <span class="badge rounded-pill text-bg-warning ms-1">Ajustado</span>
-          {% endif %}
-
-          {# Botón solo para admin #}
-          {% if request.user.is_superuser %}
-            <button
-              type="button"
-              class="btn btn-sm btn-outline-danger ms-2"
-              data-bs-toggle="modal"
-              data-bs-target="#editWorkedModal"
-              data-att-id="{{ r.id }}"
-              data-current="{{ r.worked_hhmm_net }}"
-              data-name="{{ r.employee.full_name }}"
-              data-date="{{ r.date|date:'Y-m-d' }}"
-              data-note="{{ r.manual_note|default:'' }}"
-            >
-              Editar
-            </button>
-          {% endif %}
-        </td>
-        <td>
-          {% if r.is_saturday %}
-            <span class="badge text-bg-success">No aplica (Sáb)</span>
-          {% elif r.check_in and r.check_out %}
-            {% if r.lunch_deducted %}
-              <span class="badge text-bg-danger">Descontado</span>
-            {% else %}
-              <span class="badge text-bg-secondary">Sin descuento</span>
-            {% endif %}
-          {% else %}
-            <span class="text-muted">—</span>
-          {% endif %}
-        </td>
-        <td>
-          {% if r.evidence_photo %}
-            <a href="{{ r.evidence_photo.url }}" target="_blank" class="btn btn-sm btn-outline-danger">Ver</a>
-          {% else %}
-            <span class="text-muted">—</span>
-          {% endif %}
-        </td>
-        {% if request.user.is_superuser %}
-          <td>{{ r.employee.hourly_rate }}</td>
-          <td></td>
-        {% endif %}
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="{% if request.user.is_superuser %}10{% else %}8{% endif %}" class="text-center text-muted">
-          Sin registros
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
 </div>
 
-<h4 class="mt-4 text-danger">Totales por proyecto y empleado</h4>
-<ul class="list-group">
-  {% for key, info in totals.items %}
-    <li class="list-group-item d-flex justify-content-between bg-dark text-light border-danger">
-      <span>{{ info.project }} — {{ info.name }}</span>
-      {% if request.user.is_superuser %}
-        <span>
-          <span class="me-3 text-secondary">{{ info.hhmm }}</span>
-          <strong class="text-danger">{{ info.pay_fmt }}</strong>
-          <small class="text-muted"> ({{ info.rate_fmt }} /h)</small>
-        </span>
-      {% else %}
-        <strong class="text-danger">{{ info.hhmm }}</strong>
-      {% endif %}
-    </li>
-  {% empty %}
-    <li class="list-group-item text-muted">Sin datos</li>
-  {% endfor %}
-</ul>
+<form class="card bg-dark border-danger mb-4" method="get">
 
-{% if request.user.is_superuser and grand_pay %}
-  <div class="mt-3 text-end">
-    <span class="me-3">Horas totales: <strong>{{ grand_hhmm }}</strong></span>
-    <span>Total a pagar: <strong class="text-danger">{{ grand_pay_fmt }}</strong></span>
-  </div>
-{% else %}
-  <div class="mt-3 text-end">
-    Horas totales: <strong>{{ grand_hhmm }}</strong>
-  </div>
-{% endif %}
+  <div class="card-body">
+    <div class="row g-3">
 
-{% if pagination.days_count > 0 %}
-  <div class="d-flex justify-content-between align-items-center my-3">
-    <div>
-      {% if pagination.current_date %}
-        <span class="badge text-bg-secondary">
-          Día: {{ pagination.current_date }}
-        </span>
-      {% endif %}
-    </div>
-    <div class="btn-group">
-      {% if pagination.has_prev %}
-        <a class="btn btn-outline-danger"
-           href="?month={{ month }}&project={{ q_proj }}&name={{ q_name }}&page={{ pagination.prev_page }}">← Anterior</a>
-      {% else %}
-        <button class="btn btn-outline-secondary" disabled>← Anterior</button>
-      {% endif %}
-      <span class="btn btn-dark disabled">
-        Página {{ pagination.page }} / {{ pagination.total_pages }}
-      </span>
-      {% if pagination.has_next %}
-        <a class="btn btn-outline-danger"
-           href="?month={{ month }}&project={{ q_proj }}&name={{ q_name }}&page={{ pagination.next_page }}">Siguiente →</a>
-      {% else %}
-        <button class="btn btn-outline-secondary" disabled>Siguiente →</button>
-      {% endif %}
-    </div>
-  </div>
-{% endif %}
+      <div class="col-md-2">
+        <label class="form-label fw-bold">Mes</label>
 
-{# ───────────────────────── Modal Editar (solo admin) ───────────────────────── #}
-{% if request.user.is_superuser %}
-<div class="modal fade" id="editWorkedModal" tabindex="-1" aria-labelledby="editWorkedLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="post" class="modal-content">
-      {% csrf_token %}
-      <input type="hidden" name="att_id" id="edit-att-id">
-      <input type="hidden" name="action" value="save">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editWorkedLabel">Ajustar horas trabajadas</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <input type="month"
+               class="form-control bg-dark text-light border-danger"
+               name="month"
+               value="{{ month }}">
       </div>
-      <div class="modal-body">
-        <div class="mb-2 small text-secondary" id="edit-meta"></div>
-        <div class="mb-3">
-          <label class="form-label fw-bold">Horas (HH:MM o decimales)</label>
-          <input type="text" class="form-control bg-dark text-light border-danger" name="hhmm" id="edit-hhmm" placeholder="Ej. 08:00 o 8.5">
-          <div class="form-text">Se guarda como minutos netos. Sigue aplicando para nómina y reportes.</div>
-        </div>
-        <div class="mb-2">
-          <label class="form-label fw-bold">Motivo del ajuste (opcional)</label>
-          <input type="text" class="form-control bg-dark text-light border-danger" name="note" id="edit-note" maxlength="200">
-        </div>
-        <div class="alert alert-secondary py-2">
-          <div class="small">Para quitar el ajuste y volver al cálculo automático, usa <strong>Quitar ajuste</strong>.</div>
-        </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Proyecto</label>
+
+        <select name="project"
+                class="form-select bg-dark text-light border-danger">
+
+          <option value="">Todos</option>
+
+          {% for p in projects %}
+            <option value="{{ p.slug }}"
+              {% if q_proj == p.slug %}selected{% endif %}>
+              {{ p.name }}
+            </option>
+          {% endfor %}
+
+        </select>
       </div>
-      <div class="modal-footer d-flex justify-content-between">
-        <button type="submit" class="btn btn-danger">Guardar</button>
-        <button type="submit" class="btn btn-outline-secondary"
-                formaction="" formmethod="post"
-                onclick="this.form.action=''; this.form.elements['action'].value='clear';">
-          Quitar ajuste
+
+      <div class="col-md-2">
+        <label class="form-label fw-bold">Empleado</label>
+
+        <input type="text"
+               name="name"
+               value="{{ q_name }}"
+               maxlength="150"
+               class="form-control bg-dark text-light border-danger"
+               placeholder="Nombre">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label fw-bold">Documento</label>
+
+        <input type="text"
+               name="document"
+               value="{{ q_document }}"
+               maxlength="50"
+               class="form-control bg-dark text-light border-danger"
+               placeholder="Documento">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label fw-bold">Método</label>
+
+        <select name="source"
+                class="form-select bg-dark text-light border-danger">
+
+          <option value="">Todos</option>
+
+          <option value="qr"
+            {% if q_source == "qr" %}selected{% endif %}>
+            QR
+          </option>
+
+          <option value="biometric"
+            {% if q_source == "biometric" %}selected{% endif %}>
+            Biométrico
+          </option>
+
+        </select>
+      </div>
+
+      <div class="col-md-1 d-grid">
+        <label class="form-label invisible">Buscar</label>
+
+        <button class="btn btn-danger">
+          Buscar
         </button>
       </div>
-    </form>
+
+      <div class="col-md-2 d-grid">
+        <a href="{% url 'report' %}"
+           class="btn btn-outline-danger">
+          Limpiar filtros
+        </a>
+      </div>
+
+    </div>
   </div>
+
+</form>
+
+<div class="card bg-dark border-danger">
+
+  <div class="card-body p-0">
+
+    <div class="table-responsive">
+
+      <table class="table table-dark table-hover align-middle mb-0">
+
+        <thead class="table-danger text-dark">
+          <tr>
+            <th>Proyecto</th>
+            <th>Fecha</th>
+            <th>Documento</th>
+            <th>Empleado</th>
+            <th>Ingreso</th>
+            <th>Salida</th>
+            <th>Neto</th>
+            <th>Entrada</th>
+            <th>Salida</th>
+            <th>Foto</th>
+
+            {% if request.user.is_superuser %}
+              <th>Tarifa</th>
+              <th>Total</th>
+            {% endif %}
+
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for r in rows %}
+
+          <tr>
+
+            <td>
+              <span class="badge bg-secondary">
+                {{ r.project.name }}
+              </span>
+            </td>
+
+            <td>
+              {{ r.date|date:"Y-m-d" }}
+            </td>
+
+            <td class="fw-semibold">
+              {{ r.employee.document_id|default:"—" }}
+            </td>
+
+            <td>
+              <div class="fw-bold">
+                {{ r.employee.full_name }}
+              </div>
+
+              {% if r.employee.position %}
+                <small class="text-secondary">
+                  {{ r.employee.position }}
+                </small>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if r.check_in %}
+                {{ r.check_in|date:"H:i" }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <td>
+              {% if r.check_out %}
+                {{ r.check_out|date:"H:i" }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <td>
+
+              <strong class="text-danger">
+                {{ r.worked_hhmm_net }}
+              </strong>
+
+              {% if r.manual_minutes %}
+                <span class="badge bg-warning text-dark ms-1">
+                  Ajustado
+                </span>
+              {% endif %}
+
+              {% if request.user.is_superuser %}
+                <div class="mt-1">
+
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editWorkedModal"
+                    data-att-id="{{ r.id }}"
+                    data-current="{{ r.worked_hhmm_net }}"
+                    data-name="{{ r.employee.full_name }}"
+                    data-date="{{ r.date|date:'Y-m-d' }}"
+                    data-note="{{ r.manual_note|default:'' }}"
+                  >
+                    Editar
+                  </button>
+
+                </div>
+              {% endif %}
+
+            </td>
+
+            <td>
+              {% if r.check_in_source %}
+                <span class="badge bg-dark border border-danger">
+                  {{ r.check_in_source|upper }}
+                </span>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <td>
+              {% if r.check_out_source %}
+                <span class="badge bg-dark border border-danger">
+                  {{ r.check_out_source|upper }}
+                </span>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <td>
+
+              {% if r.evidence_photo %}
+                <a href="{{ r.evidence_photo.url }}"
+                   target="_blank"
+                   class="btn btn-sm btn-outline-danger">
+                  Ver
+                </a>
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+
+            </td>
+
+            {% if request.user.is_superuser %}
+
+              <td>
+                {{ r.employee.currency }}
+                {{ r.employee.hourly_rate }}
+              </td>
+
+              <td>
+
+                {% widthratio r.worked_minutes_net 60 1 as hours_float %}
+
+                {{ r.employee.currency }}
+
+              </td>
+
+            {% endif %}
+
+          </tr>
+
+          {% empty %}
+
+          <tr>
+            <td colspan="{% if request.user.is_superuser %}12{% else %}10{% endif %}"
+                class="text-center text-muted py-4">
+
+              No existen registros para los filtros seleccionados.
+
+            </td>
+          </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+</div>
+
+<div class="row mt-4 g-4">
+
+  <div class="col-lg-7">
+
+    <div class="card bg-dark border-danger h-100">
+
+      <div class="card-header bg-danger text-white">
+        Totales por empleado
+      </div>
+
+      <div class="list-group list-group-flush">
+
+        {% for key, info in totals.items %}
+
+          <div class="list-group-item bg-dark text-light border-danger">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+              <div>
+                <div class="fw-bold">
+                  {{ info.name }}
+                </div>
+
+                <small class="text-secondary">
+                  {{ info.project }}
+                </small>
+              </div>
+
+              <div class="text-end">
+
+                <div class="fw-bold text-danger">
+                  {{ info.hhmm }}
+                </div>
+
+                {% if request.user.is_superuser %}
+                  <small class="text-secondary">
+                    {{ info.pay_fmt }}
+                  </small>
+                {% endif %}
+
+              </div>
+
+            </div>
+
+          </div>
+
+        {% empty %}
+
+          <div class="list-group-item bg-dark text-muted border-danger">
+            Sin datos disponibles.
+          </div>
+
+        {% endfor %}
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="col-lg-5">
+
+    <div class="card bg-dark border-danger h-100">
+
+      <div class="card-header bg-danger text-white">
+        Resumen general
+      </div>
+
+      <div class="card-body">
+
+        <div class="mb-3">
+          <small class="text-secondary d-block">
+            Horas totales trabajadas
+          </small>
+
+          <h4 class="text-danger mb-0">
+            {{ grand_hhmm }}
+          </h4>
+        </div>
+
+        {% if request.user.is_superuser %}
+
+          <div>
+            <small class="text-secondary d-block mb-2">
+              Total estimado de nómina
+            </small>
+
+            {% for total in grand_pay_fmt %}
+              <div class="fw-bold text-light">
+                {{ total }}
+              </div>
+            {% endfor %}
+          </div>
+
+        {% endif %}
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+{% if page_obj.has_other_pages %}
+
+<nav class="mt-4">
+
+  <ul class="pagination justify-content-center">
+
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link bg-dark text-danger border-danger"
+           href="?page={{ page_obj.previous_page_number }}&month={{ month }}&project={{ q_proj }}&name={{ q_name }}&document={{ q_document }}&source={{ q_source }}">
+          Anterior
+        </a>
+      </li>
+    {% endif %}
+
+    <li class="page-item active">
+      <span class="page-link bg-danger border-danger">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+      </span>
+    </li>
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link bg-dark text-danger border-danger"
+           href="?page={{ page_obj.next_page_number }}&month={{ month }}&project={{ q_proj }}&name={{ q_name }}&document={{ q_document }}&source={{ q_source }}">
+          Siguiente
+        </a>
+      </li>
+    {% endif %}
+
+  </ul>
+
+</nav>
+
+{% endif %}
+
+{% if request.user.is_superuser %}
+
+<div class="modal fade"
+     id="editWorkedModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+  <div class="modal-dialog">
+
+    <form method="post" class="modal-content bg-dark text-light border-danger">
+
+      {% csrf_token %}
+
+      <input type="hidden" name="att_id" id="edit-att-id">
+      <input type="hidden" name="action" value="save">
+
+      <div class="modal-header border-danger">
+        <h5 class="modal-title">
+          Ajustar horas trabajadas
+        </h5>
+
+        <button type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="mb-2 small text-secondary" id="edit-meta"></div>
+
+        <div class="mb-3">
+
+          <label class="form-label fw-bold">
+            Horas
+          </label>
+
+          <input type="text"
+                 class="form-control bg-dark text-light border-danger"
+                 name="hhmm"
+                 id="edit-hhmm"
+                 placeholder="08:00 o 8.5">
+
+          <div class="form-text text-secondary">
+            Puedes usar formato HH:MM o decimal.
+          </div>
+
+        </div>
+
+        <div class="mb-2">
+
+          <label class="form-label fw-bold">
+            Motivo del ajuste
+          </label>
+
+          <input type="text"
+                 class="form-control bg-dark text-light border-danger"
+                 name="note"
+                 id="edit-note"
+                 maxlength="200">
+
+        </div>
+
+      </div>
+
+      <div class="modal-footer border-danger d-flex justify-content-between">
+
+        <button type="submit"
+                class="btn btn-danger">
+          Guardar ajuste
+        </button>
+
+        <button type="submit"
+                class="btn btn-outline-secondary"
+                formaction=""
+                formmethod="post"
+                onclick="this.form.action=''; this.form.elements['action'].value='clear';">
+
+          Quitar ajuste
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
 </div>
 
 <script>
-  const editModal = document.getElementById('editWorkedModal');
-  editModal.addEventListener('show.bs.modal', event => {
+const editModal = document.getElementById("editWorkedModal");
+
+if (editModal) {
+  editModal.addEventListener("show.bs.modal", function(event) {
+
     const btn = event.relatedTarget;
-    document.getElementById('edit-att-id').value = btn.getAttribute('data-att-id');
-    document.getElementById('edit-hhmm').value   = (btn.getAttribute('data-current') || '').trim();
-    document.getElementById('edit-note').value   = (btn.getAttribute('data-note') || '').trim();
-    const meta = `${btn.getAttribute('data-name')} — ${btn.getAttribute('data-date')}`;
-    document.getElementById('edit-meta').textContent = meta;
-    // Al abrir, aseguramos acción por defecto = save
-    editModal.querySelector('input[name="action"]').value = 'save';
+
+    document.getElementById("edit-att-id").value =
+      btn.getAttribute("data-att-id");
+
+    document.getElementById("edit-hhmm").value =
+      (btn.getAttribute("data-current") || "").trim();
+
+    document.getElementById("edit-note").value =
+      (btn.getAttribute("data-note") || "").trim();
+
+    document.getElementById("edit-meta").textContent =
+      `${btn.getAttribute("data-name")} — ${btn.getAttribute("data-date")}`;
   });
+}
 </script>
+
 {% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const nameInput = document.querySelector("[name='name']");
+  const docInput = document.querySelector("[name='document']");
+
+  if (nameInput) {
+    nameInput.addEventListener("input", function () {
+      this.value = this.value.replace(/[0-9]/g, "");
+    });
+  }
+
+  if (docInput) {
+    docInput.addEventListener("input", function () {
+      this.value = this.value.replace(/[^A-Za-z0-9\\-.]/g, "").toUpperCase();
+    });
+  }
+
+});
+</script>
 
 {% endlocaltime %}
 {% endblock %}
